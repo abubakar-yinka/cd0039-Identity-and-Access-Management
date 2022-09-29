@@ -87,7 +87,7 @@ def create_drink(payload):
         new_title = body.get('title', None)
         if not new_title:
             abort(422)
-        new_recipe = [body.get('recipe', None)]
+        new_recipe = body.get('recipe', None)
         if not new_recipe:
             abort(422)
         drink = Drink(title=new_title, recipe=json.dumps(new_recipe))
@@ -126,7 +126,7 @@ def update_drink(payload, id):
             drink.title = new_title
         new_recipe = body.get('recipe', None)
         if new_recipe:
-            drink.recipe = json.dumps([new_recipe])
+            drink.recipe = json.dumps(new_recipe)
         drink.update()
         return jsonify({
             'success': True,
@@ -195,6 +195,7 @@ def unprocessable(error):
     error handler should conform to general task above
 '''
 
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
@@ -202,6 +203,7 @@ def not_found(error):
         "error": 404,
         "message": "resource not found"
     }), 404
+
 
 '''
 @DONE implement error handler for AuthError
