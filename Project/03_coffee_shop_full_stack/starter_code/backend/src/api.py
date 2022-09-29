@@ -101,16 +101,39 @@ def create_drink(payload):
 
 
 '''
-@TODO implement endpoint
+@DONE implement endpoint
     PATCH /drinks/<id>
         where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should update the corresponding row for <id>
-        it should require the 'patch:drinks' permission
-        it should contain the drink.long() data representation
-    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
-        or appropriate status code indicating reason for failure
+        it should respond with a 404 error if <id> is not found - DONE
+        it should update the corresponding row for <id> - DONE
+        it should require the 'patch:drinks' permission - DONE
+        it should contain the drink.long() data representation - DONE
+    returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink - DONE
+        or appropriate status code indicating reason for failure - DONE
 '''
+
+
+@app.route('/drinks/<int:id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def update_drink(payload, id):
+    try:
+        body = request.get_json()
+        drink = Drink.query.filter(Drink.id == id).one_or_none()
+        if not drink:
+            abort(404)
+        new_title = body.get('title', None)
+        if new_title:
+            drink.title = new_title
+        new_recipe = body.get('recipe', None)
+        if new_recipe:
+            drink.recipe = json.dumps([new_recipe])
+        drink.update()
+        return jsonify({
+            'success': True,
+            'drinks': [drink.long()]
+        }), 200
+    except:
+        abort(422)
 
 
 '''
@@ -141,7 +164,7 @@ def unprocessable(error):
 
 
 '''
-@TODO implement error handlers using the @app.errorhandler(error) decorator
+@DONE implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
              jsonify({
                     "success": False,
@@ -152,13 +175,20 @@ def unprocessable(error):
 '''
 
 '''
-@TODO implement error handler for 404
+@DONE implement error handler for 404
     error handler should conform to general task above
 '''
 
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
 
 '''
-@TODO implement error handler for AuthError
+@DONE implement error handler for AuthError
     error handler should conform to general task above
 '''
 
@@ -168,5 +198,5 @@ def auth_error(error):
     return jsonify({
         "success": False,
         "error": error.status_code,
-        "message": error.error
+        "message": error.error['description']
     }), error.status_code
