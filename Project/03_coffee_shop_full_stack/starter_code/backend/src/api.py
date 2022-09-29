@@ -12,7 +12,7 @@ setup_db(app)
 CORS(app)
 
 '''
-@TODO uncomment the following line to initialize the datbase
+@DONE uncomment the following line to initialize the datbase
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
@@ -133,19 +133,35 @@ def update_drink(payload, id):
             'drinks': [drink.long()]
         }), 200
     except:
-        abort(422)
+        abort(404)
 
 
 '''
-@TODO implement endpoint
+@DONE implement endpoint
     DELETE /drinks/<id>
         where <id> is the existing model id
-        it should respond with a 404 error if <id> is not found
-        it should delete the corresponding row for <id>
-        it should require the 'delete:drinks' permission
-    returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
-        or appropriate status code indicating reason for failure
+        it should respond with a 404 error if <id> is not found - DONE
+        it should delete the corresponding row for <id> - DONE
+        it should require the 'delete:drinks' permission - DONE
+    returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record - DONE
+        or appropriate status code indicating reason for failure - DONE
 '''
+
+
+@app.route('/drinks/<int:id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
+def delete_drink(payload, id):
+    try:
+        drink = Drink.query.filter(Drink.id == id).one_or_none()
+        if not drink:
+            abort(404)
+        drink.delete()
+        return jsonify({
+            'success': True,
+            'delete': id
+        }), 200
+    except:
+        abort(404)
 
 
 # Error Handling
