@@ -9,29 +9,60 @@ AUTH0_DOMAIN = 'udacity-fsnd.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'dev'
 
-## AuthError Exception
+# AuthError Exception
 '''
 AuthError Exception
 A standardized way to communicate auth failure modes
 '''
+
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
         self.status_code = status_code
 
 
-## Auth Header
+# Auth Header
 
 '''
-@TODO implement get_token_auth_header() method
-    it should attempt to get the header from the request
-        it should raise an AuthError if no header is present
-    it should attempt to split bearer and the token
-        it should raise an AuthError if the header is malformed
-    return the token part of the header
+@DONE implement get_token_auth_header() method
+    it should attempt to get the header from the request - DONE
+        it should raise an AuthError if no header is present - DONE
+    it should attempt to split bearer and the token - DONE
+        it should raise an AuthError if the header is malformed - DONE
+    return the token part of the header - DONE
 '''
+
+
 def get_token_auth_header():
-   raise Exception('Not Implemented')
+    auth_token = request.headers.get('Authorization', None)
+    # *Check if auth header is present
+    if not auth_token:
+        raise AuthError({
+            'code': 'authorization_header_missing',
+            'description': 'Authorization header is required.'
+        }, 401)
+    
+    # *Split auth token header into parts
+    auth_token_parts = auth_token.split()
+    if auth_token_parts[0].lower() != 'bearer':
+        raise AuthError({
+            'code': 'header_malformed',
+            'description': 'Authorization header must start with "Bearer".'
+        }, 401)
+    elif len(auth_token_parts) == 1:
+        raise AuthError({
+            'code': 'header_malformed',
+            'description': 'JWT Token not added.'
+        }, 401)
+    elif len(auth_token_parts) > 2:
+        raise AuthError({
+            'code': 'header_malformed',
+            'description': 'Authorization header must contain only "bearer [token]".'
+        }, 401)
+    
+    jwt_token = auth_token_parts[1]
+    return jwt_token
 
 '''
 @TODO implement check_permissions(permission, payload) method
